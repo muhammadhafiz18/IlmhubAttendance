@@ -18,7 +18,7 @@ public class AttendanceService : IAttendanceService
             // Google sheet'ga saqlidigan logika bo'lishi kerak
             return $"✅ {student.FullName} you are marked as present";
         }
-        else
+        else 
         {
             return $"❌ {student.FullName} you are not in edu. center yet, please try again later";
         }
