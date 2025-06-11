@@ -26,14 +26,14 @@ public class TelegramWebhook(ILogger<TelegramWebhook> logger,
 
         Console.WriteLine(json);
 
-        var update = System.Text.Json.JsonSerializer.Deserialize<Update>(json, new JsonSerializerOptions
+        var update = System.Text.Json.JsonSerializer.Deserialize<Models.Update>(json, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true // fullname
         });
 
-        if (update?.Message?.Type == MessageType.Text && update.Message.Text?.ToLower() == "/start")
+        if (update.Message.Text?.ToLower() == "/start")
         {
-            logger.LogInformation("/start is received from " + update.Message.Chat.FirstName, update.Message.Chat.LastName, update.Message.Chat.Username, update.Message.Chat.Id);
+            logger.LogInformation("/start is received from " + update.Message.Chat.FirstName, update.Message.Chat.LastName, update.Message.Chat.UserName, update.Message.Chat.Id);
 
             var replyKeyboard = new ReplyKeyboardMarkup(new[]
             {
@@ -58,22 +58,23 @@ public class TelegramWebhook(ILogger<TelegramWebhook> logger,
 
                 logger.LogDebug("message is sent to {update.Message.Chat.Id}", update.Message.Chat.Id);
 
-                logger.LogInformation("keyboard is sent to " + update.Message.Chat.FirstName, update.Message.Chat.LastName, update.Message.Chat.Username, update.Message.Chat.Id);
+                logger.LogInformation("keyboard is sent to " + update.Message.Chat.FirstName, update.Message.Chat.LastName, update.Message.Chat.UserName, update.Message.Chat.Id);
             }
             catch (Exception ex)
             {
                 logger.LogWarning("Keyboard was not sent {ex.Message}", ex.Message);
             }
         }
-        else if (update?.Message?.Type == MessageType.Location)
+        
+        else if (update?.Message.Location != null)
         {
-            logger.LogInformation("location is received from " + update.Message.Chat.FirstName, update.Message.Chat.LastName, update.Message.Chat.Username, update.Message.Chat.Id);
+            logger.LogInformation("location is received from " + update.Message.Chat.FirstName, update.Message.Chat.LastName, update.Message.Chat.UserName, update.Message.Chat.Id);
 
             var student = new Student
             {
                 ChatId = update.Message.Chat.Id,
                 FullName = update.Message.Chat.FirstName + " " + update.Message.Chat.LastName,
-                UserName = update.Message.Chat.Username,
+                UserName = update.Message.Chat.UserName,
                 LastLatitude = update.Message.Location.Latitude,
                 LastLongitude = update.Message.Location.Longitude
             };
@@ -81,7 +82,7 @@ public class TelegramWebhook(ILogger<TelegramWebhook> logger,
             string result = attendanceService.MarkAttendance(student);
             await botClient.SendMessage(update.Message.Chat.Id, result);
 
-            logger.LogInformation($"Attendance result '{result}' is sent to {update.Message.Chat.FirstName}, {update.Message.Chat.Username}, {update.Message.Chat.Id}");
+            logger.LogInformation($"Attendance result '{result}' is sent to {update.Message.Chat.FirstName}, {update.Message.Chat.UserName}, {update.Message.Chat.Id}");
         }
 
         return new OkObjectResult("Welcome to Azure Functions!");
