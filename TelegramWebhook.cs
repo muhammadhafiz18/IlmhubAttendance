@@ -31,8 +31,13 @@ public class TelegramWebhook(ILogger<TelegramWebhook> logger,
             PropertyNameCaseInsensitive = true // fullname
         });
         
+        // Debug logging to see the structure
+        logger.LogInformation("Full update object: {update}", JsonSerializer.Serialize(update));
+        logger.LogInformation("Message object: {message}", JsonSerializer.Serialize(update.Message));
+        logger.LogInformation("ForwardOrigin object: {forwardOrigin}", JsonSerializer.Serialize(update.Message.ForwardOrigin));
+        
         logger.LogInformation("{update.Message.ForwardDate}", update.Message.ForwardDate);
-        logger.LogInformation("{update.Message.ForwardDate}", update.Message.ForwardOrigin.SenderUser.Username);
+        logger.LogInformation("{update.Message.ForwardDate}", update.Message.ForwardOrigin?.SenderUser.Username);
 
         if (update.Message.Text?.ToLower() == "/start")
         {
@@ -71,7 +76,8 @@ public class TelegramWebhook(ILogger<TelegramWebhook> logger,
 
         else if(update.Message.ForwardDate != 0)
         {
-            logger.LogInformation("Received location that was forwarded from {update.Message.ForwardOrigin.SenderUser.Username}", update.Message.ForwardOrigin.SenderUser.Username);
+            var forwarderUsername = update.Message.ForwardOrigin?.SenderUser?.Username ?? "unknown user";
+            logger.LogInformation("Received location that was forwarded from {forwarderUsername}", forwarderUsername);
         
             await botClient.SendMessage(update.Message.Chat.Id, "please use button for sending location!");
         }        

@@ -10,6 +10,8 @@ public class Message
     public Chat Chat { get; set; }
     public long Date { get; set; }
     public string Text { get; set; }
+
+    [JsonPropertyName("forward_origin")]
     public ForwardOrigin ForwardOrigin { get; set; }
 
     [JsonPropertyName("forward_date")]
