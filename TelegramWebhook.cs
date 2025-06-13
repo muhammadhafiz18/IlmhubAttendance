@@ -30,6 +30,9 @@ public class TelegramWebhook(ILogger<TelegramWebhook> logger,
         {
             PropertyNameCaseInsensitive = true // fullname
         });
+        
+        logger.LogInformation("{update.Message.ForwardDate}", update.Message.ForwardDate);
+        logger.LogInformation("{update.Message.ForwardDate}", update.Message.ForwardOrigin.SenderUser.Username);
 
         if (update.Message.Text?.ToLower() == "/start")
         {
@@ -65,7 +68,14 @@ public class TelegramWebhook(ILogger<TelegramWebhook> logger,
                 logger.LogWarning("Keyboard was not sent {ex.Message}", ex.Message);
             }
         }
+
+        else if(update.Message.ForwardDate != 0)
+        {
+            logger.LogInformation("Received location that was forwarded from {update.Message.ForwardOrigin.SenderUser.Username}", update.Message.ForwardOrigin.SenderUser.Username);
         
+            await botClient.SendMessage(update.Message.Chat.Id, "please use button for sending location!");
+        }        
+
         else if (update?.Message.Location != null)
         {
             logger.LogInformation("location is received from " + update.Message.Chat.FirstName, update.Message.Chat.LastName, update.Message.Chat.UserName, update.Message.Chat.Id);
